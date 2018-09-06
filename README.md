@@ -39,6 +39,10 @@ Finally, stop the ptrace-wrap instance:
 ptrace_wrap_instance_stop (&inst);
 ```
 
+Please note that ptrace-wrap is **absolutely not thread-safe**!
+It is only a solution for specific the pid/tid issue of ptrace.
+If you need thread-safety, you must synchronize the access yourself.
+
 ## About
 
 Created by Florian Märkl for [radare2](https://github.com/radare/radare2) and [Cutter](https://github.com/radareorg/cutter/).
