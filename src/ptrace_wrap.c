@@ -44,7 +44,9 @@ static void *th_run(ptrace_wrap_instance *inst) {
 			break;
 		}
 		inst->result = ptrace (inst->request.request, inst->request.pid, inst->request.addr, inst->request.data);
-		*inst->request._errno = errno;
+		if (inst->request._errno) {
+			*inst->request._errno = errno;
+		}
 		sem_post (&inst->result_sem);
 	}
 	return NULL;
