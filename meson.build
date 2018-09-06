@@ -1,0 +1,11 @@
+
+project('ptrace-wrap', 'c')
+
+ptrace_wrap_inc = include_directories('include')
+
+ptrace_wrap_src = ['src/ptrace_wrap.c']
+
+ptrace_wrap_lib = library('ptrace_wrap', ptrace_wrap_src, include_directories: ptrace_wrap_inc)
+ptrace_wrap_dep = declare_dependency(link_with: ptrace_wrap_lib, include_directories: ptrace_wrap_inc)
+
+subdir('test')
