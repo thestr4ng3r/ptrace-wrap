@@ -54,10 +54,9 @@ int main(int argc, const char *argv[]) {
 		return 1;
 	}
 
-	int _errno;
-	long r = ptrace_wrap (&inst, PTRACE_ATTACH, pid, NULL, NULL, &_errno);
+	long r = ptrace_wrap (&inst, PTRACE_ATTACH, pid, NULL, NULL);
 	if (r < 0) {
-		printf ("ptrace err %s\n", strerror(_errno));
+		perror ("ptrace");
 	}
 
 	int wstatus;
@@ -70,9 +69,9 @@ int main(int argc, const char *argv[]) {
 	}
 
 	while (1) {
-		r = ptrace_wrap (&inst, PTRACE_CONT, pid, NULL, NULL, &_errno);
+		r = ptrace_wrap (&inst, PTRACE_CONT, pid, NULL, NULL);
 		if (r < 0) {
-			printf ("ptrace err %s\n", strerror(_errno));
+			perror ("ptrace");
 			break;
 		}
 

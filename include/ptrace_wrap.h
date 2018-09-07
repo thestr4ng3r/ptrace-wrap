@@ -41,6 +41,6 @@ typedef struct ptrace_wrap_instance_t {
 
 int ptrace_wrap_instance_start(ptrace_wrap_instance *inst);
 void ptrace_wrap_instance_stop(ptrace_wrap_instance *inst);
-long ptrace_wrap(ptrace_wrap_instance *inst, enum __ptrace_request request, pid_t pid, void *addr, void *data, int *_errno);
+long ptrace_wrap(ptrace_wrap_instance *inst, enum __ptrace_request request, pid_t pid, void *addr, void *data);
 
 #endif //PTRACE_WRAP_H

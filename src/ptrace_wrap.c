@@ -68,14 +68,16 @@ static void *th_run(ptrace_wrap_instance *inst) {
 	return NULL;
 }
 
-long ptrace_wrap(ptrace_wrap_instance *inst, enum __ptrace_request request, pid_t pid, void *addr, void *data, int *_errno) {
+long ptrace_wrap(ptrace_wrap_instance *inst, enum __ptrace_request request, pid_t pid, void *addr, void *data) {
+	int _errno = 0;
 	inst->request.request = request;
 	inst->request.pid = pid;
 	inst->request.addr = addr;
 	inst->request.data = data;
-	inst->request._errno = _errno;
+	inst->request._errno = &_errno;
 	inst->request.stop = 0;
 	sem_post (&inst->request_sem);
 	sem_wait (&inst->result_sem);
+	errno = _errno;
 	return inst->result;
 }

@@ -24,13 +24,12 @@ if (r != 0) {
 ```
 
 Then, simply use the `ptrace_wrap()` function instead of `ptrace()` for your calls.
-Because ptrace can set errno, which is thread-local, it is written into the pointer given as an argument.
 
 ```
 int _errno;
 long pr = ptrace_wrap (&inst, <request>, <pid>, <addr>, <data>, &_errno);
 if (pr < 0) {
-    printf ("ptrace error: %s\n", strerror(_errno));
+    perror ("ptrace");
 }
 ```
 
