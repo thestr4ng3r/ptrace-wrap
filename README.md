@@ -32,6 +32,28 @@ if (pr < 0) {
 }
 ```
 
+If a child process should be spawned with `fork()` and traced by calling `PTRACE_TRACEME`
+from inside of it, `ptrace_wrap_fork()` has to be used instead of plain `fork()`.
+The behaviour in the child process is slightly different then. Instead of returning 0,
+`ptrace_wrap_fork()` calls a callback in the child process. Example:
+
+```
+void child_callback(void *user) {
+    const char *file = user;
+    ptrace (PTRACE_TRACEME, 0, NULL, NULL);
+    execl (file, file, NULL);
+    perror ("execl");
+    exit (1);
+}
+
+// ...
+
+pid_t pid = ptrace_wrap_fork (&inst, child_callback, "<path to an executable>");
+if (pid < 0) {
+    perror ("fork");
+}
+```
+
 Finally, stop the ptrace-wrap instance:
 ```
 ptrace_wrap_instance_stop (&inst);
