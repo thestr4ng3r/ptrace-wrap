@@ -24,7 +24,8 @@
 
 typedef enum {
 	PTRACE_WRAP_REQUEST_TYPE_STOP,
-	PTRACE_WRAP_REQUEST_TYPE_PTRACE
+	PTRACE_WRAP_REQUEST_TYPE_PTRACE,
+	PTRACE_WRAP_REQUEST_TYPE_FORK
 } ptrace_wrap_request_type;
 
 typedef struct ptrace_wrap_request_t {
@@ -37,6 +38,11 @@ typedef struct ptrace_wrap_request_t {
 			void *data;
 			int *_errno;
 		} ptrace;
+		struct {
+			void (*child_callback)(void *);
+			void *child_callback_user;
+			int *_errno;
+		} fork;
 	};
 } ptrace_wrap_request;
 
@@ -45,11 +51,15 @@ typedef struct ptrace_wrap_instance_t {
 	sem_t request_sem;
 	ptrace_wrap_request request;
 	sem_t result_sem;
-	long result;
+	union {
+		long ptrace_result;
+		pid_t fork_result;
+	};
 } ptrace_wrap_instance;
 
 int ptrace_wrap_instance_start(ptrace_wrap_instance *inst);
 void ptrace_wrap_instance_stop(ptrace_wrap_instance *inst);
 long ptrace_wrap(ptrace_wrap_instance *inst, enum __ptrace_request request, pid_t pid, void *addr, void *data);
+pid_t ptrace_wrap_fork(ptrace_wrap_instance *inst, void (*child_callback)(void *), void *child_callback_user);
 
 #endif //PTRACE_WRAP_H

@@ -30,34 +30,42 @@ void handle_sigint(int v) {
 	kill (child_pid, SIGKILL);
 }
 
+void child_callback(void *user) {
+	const char *file = user;
+	ptrace (PTRACE_TRACEME, 0, NULL, NULL);
+	execl (file, file, NULL);
+	perror ("execl");
+	exit (1);
+}
+
 int main(int argc, const char *argv[]) {
 	if (argc != 2) {
-		printf("usage: %s [executable]\n", argv[0]);
+		printf("usage: %s [executable or pid]\n", argv[0]);
 		return 1;
 	}
-	const char *file = argv[1];
-
-	pid_t pid = fork();
-	if (pid < 0) {
-		perror ("fork");
-		return 1;
-	}
-	if (pid == 0) {
-		execl (file, file, NULL);
-		perror ("execl");
-		exit (1);
-	}
-	child_pid = pid;
+	const char *tracee = argv[1];
 
 	if (ptrace_wrap_instance_start (&inst) != 0) {
 		fprintf (stderr, "ptrace_wrap_instance_start failed.\n");
 		return 1;
 	}
 
-	long r = ptrace_wrap (&inst, PTRACE_ATTACH, pid, NULL, NULL);
-	if (r < 0) {
-		perror ("ptrace");
+	long r;
+
+	pid_t pid = (pid_t) atol (tracee);
+	if (pid) {
+		r = ptrace_wrap (&inst, PTRACE_ATTACH, pid, NULL, NULL);
+		if (r < 0) {
+			perror ("ptrace");
+		}
+	} else {
+		pid = ptrace_wrap_fork (&inst, child_callback, (void *)tracee);
+		if (pid < 0) {
+			perror ("fork");
+			return 1;
+		}
 	}
+	child_pid = pid;
 
 	int wstatus;
 	if (waitpid(pid, &wstatus, 0) < 0) {
