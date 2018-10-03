@@ -46,7 +46,7 @@ int ptrace_wrap_instance_start(ptrace_wrap_instance *inst) {
 }
 
 void ptrace_wrap_instance_stop(ptrace_wrap_instance *inst) {
-	inst->request.stop = 1;
+	inst->request.type = PTRACE_WRAP_REQUEST_TYPE_STOP;
 	sem_post (&inst->request_sem);
 	pthread_join (inst->th, NULL);
 	sem_destroy (&inst->request_sem);
@@ -56,26 +56,33 @@ void ptrace_wrap_instance_stop(ptrace_wrap_instance *inst) {
 static void *th_run(ptrace_wrap_instance *inst) {
 	while (1) {
 		sem_wait (&inst->request_sem);
-		if (inst->request.stop) {
+		switch (inst->request.type) {
+		case PTRACE_WRAP_REQUEST_TYPE_STOP:
+			goto stop;
+		case PTRACE_WRAP_REQUEST_TYPE_PTRACE:
+			inst->result = ptrace (inst->request.ptrace.request,
+					inst->request.ptrace.pid,
+					inst->request.ptrace.addr,
+					inst->request.ptrace.data);
+			if (inst->request.ptrace._errno) {
+				*inst->request.ptrace._errno = errno;
+			}
 			break;
-		}
-		inst->result = ptrace (inst->request.request, inst->request.pid, inst->request.addr, inst->request.data);
-		if (inst->request._errno) {
-			*inst->request._errno = errno;
 		}
 		sem_post (&inst->result_sem);
 	}
+stop:
 	return NULL;
 }
 
 long ptrace_wrap(ptrace_wrap_instance *inst, enum __ptrace_request request, pid_t pid, void *addr, void *data) {
 	int _errno = 0;
-	inst->request.request = request;
-	inst->request.pid = pid;
-	inst->request.addr = addr;
-	inst->request.data = data;
-	inst->request._errno = &_errno;
-	inst->request.stop = 0;
+	inst->request.type = PTRACE_WRAP_REQUEST_TYPE_PTRACE;
+	inst->request.ptrace.request = request;
+	inst->request.ptrace.pid = pid;
+	inst->request.ptrace.addr = addr;
+	inst->request.ptrace.data = data;
+	inst->request.ptrace._errno = &_errno;
 	sem_post (&inst->request_sem);
 	sem_wait (&inst->result_sem);
 	errno = _errno;

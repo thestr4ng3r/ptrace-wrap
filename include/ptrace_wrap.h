@@ -22,13 +22,22 @@
 #include <semaphore.h>
 #include <sys/ptrace.h>
 
+typedef enum {
+	PTRACE_WRAP_REQUEST_TYPE_STOP,
+	PTRACE_WRAP_REQUEST_TYPE_PTRACE
+} ptrace_wrap_request_type;
+
 typedef struct ptrace_wrap_request_t {
-	enum __ptrace_request request;
-	pid_t pid;
-	void *addr;
-	void *data;
-	int *_errno;
-	int stop;
+	ptrace_wrap_request_type type;
+	union {
+		struct {
+			enum __ptrace_request request;
+			pid_t pid;
+			void *addr;
+			void *data;
+			int *_errno;
+		} ptrace;
+	};
 } ptrace_wrap_request;
 
 typedef struct ptrace_wrap_instance_t {
