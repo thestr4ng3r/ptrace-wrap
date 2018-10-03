@@ -26,8 +26,7 @@ if (r != 0) {
 Then, simply use the `ptrace_wrap()` function instead of `ptrace()` for your calls.
 
 ```
-int _errno;
-long pr = ptrace_wrap (&inst, <request>, <pid>, <addr>, <data>, &_errno);
+long pr = ptrace_wrap (&inst, <request>, <pid>, <addr>, <data>);
 if (pr < 0) {
     perror ("ptrace");
 }
