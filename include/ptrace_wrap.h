@@ -38,7 +38,7 @@ typedef struct ptrace_wrap_request_t {
 	ptrace_wrap_request_type type;
 	union {
 		struct {
-			ptrace_wrap_request_t request;
+			ptrace_wrap_ptrace_request request;
 			pid_t pid;
 			void *addr;
 			void *data;
