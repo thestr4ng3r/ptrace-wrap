@@ -25,7 +25,7 @@
 #ifdef __GLIBC__
 typedef enum __ptrace_request ptrace_wrap_request_t;
 #else
-typedef int ptrace_wrap_request_t;
+typedef int ptrace_wrap_ptrace_request;
 #endif
 
 typedef enum {
