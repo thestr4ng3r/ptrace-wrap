@@ -38,6 +38,11 @@ void child_callback(void *user) {
 	exit (1);
 }
 
+void *print_pid(void *user) {
+	const char *t = user;
+	printf("%s has pid %lu\n", t, pthread_self ());
+}
+
 int main(int argc, const char *argv[]) {
 	if (argc != 2) {
 		printf("usage: %s [executable or pid]\n", argv[0]);
@@ -49,6 +54,9 @@ int main(int argc, const char *argv[]) {
 		fprintf (stderr, "ptrace_wrap_instance_start failed.\n");
 		return 1;
 	}
+
+	print_pid ("main thread");
+	ptrace_wrap_func (&inst, print_pid, "ptrace thread");
 
 	long r;
 
